@@ -44,7 +44,7 @@ Function Touch-File {
 Set-Alias -Name touch -Value "Touch-File"
 
 ###
-# Miscilaneous 
+# Miscellaneous 
 ###
 
 # Chocolatey profile
