@@ -62,8 +62,8 @@ function Update-Profile {
         Set-Content -Path $PROFILE -Value $CloudProfile
         Write-Host "Reloading with new profile..."
 
-        ## This isn't working
-        ## & $PROFILE
+        
+        . $PROFILE
     }
     catch {
         Write-Warning "Something went wrong."
