@@ -56,13 +56,12 @@ function Update-Profile {
         Write-Host "Getting local profile..."
         $CurrentProfile = Get-Content -Path $PROFILE
         Write-Host "Getting cloud profile..."
-        $CloudProfile = Get-Content ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/graememeyer/WindowsPowerShell-Profile/main/Microsoft.PowerShell_profile.ps1'))
+        $CloudProfile = ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/graememeyer/WindowsPowerShell-Profile/main/Microsoft.PowerShell_profile.ps1'))
         Write-Host "Succesfully downloaded cloud profile."
         Write-Host "Updating local profile..."
         Set-Content -Path $PROFILE -Value $CloudProfile
         Write-Host "Reloading with new profile..."
-        
-        Write-Host "You must restart your terminal/host for this to take effect."
+
         ## This isn't working
         ## & $PROFILE
     }
