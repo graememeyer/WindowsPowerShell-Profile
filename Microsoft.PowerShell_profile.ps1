@@ -26,6 +26,8 @@ if (test-path alias:curl) {
 
 #
 Set-Alias -Name windowsterminal -Value "wt -d $($pwd)"
+Set-Alias -Name Splunk -Value "C:\Program Files\Splunk\bin\splunk.exe"
+Set-Alias -Name ll -Value "Get-ChildItem"
 
 # Touch-File
 Function Touch-File {
