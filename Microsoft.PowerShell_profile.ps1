@@ -6,6 +6,20 @@ function Prompt {
     Write-Output "PS > "
 }
 
+function Get-BetterHistory {
+    [alias("h")]
+    param (
+        [Parameter(Mandatory=$False)]
+        [Alias("Lines")]
+        [Int32]
+        $NumberOfLines = 100
+    )
+    process {
+        
+        Get-Content (Get-PSReadlineOption).HistorySavePath -Tail $NumberOfLines
+    }
+}
+
 # function global:prompt {
 #     $PwdPath = Split-Path -Path $pwd -Leaf
 #     Write-Host -Object "$PwdPath" -NoNewline -ForegroundColor Magenta
@@ -103,3 +117,4 @@ function Install-ZimmermanTools {
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
     iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/EricZimmerman/Get-ZimmermanTools/master/Get-ZimmermanTools.ps1'))
 }
+
