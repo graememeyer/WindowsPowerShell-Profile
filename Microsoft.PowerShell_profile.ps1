@@ -109,7 +109,8 @@ function Install-Chocolatey {
 $Base = @("7zip", "boxstarter", "firefox", "git", "hashtab", "hxd", "notepadplusplus", "vlc", "windirstat", "microsoft-windows-terminal")
 $Development += @($Base, "vscode", "azure-cli", "awscli", "terraform")
 $Forensics += @($Base, "sysinternals", "yara")
-$Personal += @($Base, "nordvpn", "mkvtoolnix")
+$ReverseEngineering += @($Base, "ida-free", "ghidra")
+$Personal += @($Base, "mkvtoolnix")
 
 # Zimmerman Tools
 function Install-ZimmermanTools {
