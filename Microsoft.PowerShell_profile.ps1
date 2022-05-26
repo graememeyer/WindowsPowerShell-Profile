@@ -106,7 +106,7 @@ function Install-Chocolatey {
 }
 
 # Chocolatey application lists
-$Base = @("7zip", "boxstarter", "firefox", "git", "hashtab", "hxd", "notepadplusplus", "vlc", "windirstat", "microsoft-windows-terminal")
+$Base = @("7zip", "boxstarter", "firefox", "git", "hashtab", "hxd", "notepadplusplus", "vlc", "windirstat", "microsoft-windows-terminal", "python")
 $Development += @($Base, "vscode", "azure-cli", "awscli", "terraform")
 $Forensics += @($Base, "sysinternals", "yara")
 $ReverseEngineering += @($Base, "ida-free", "ghidra")
