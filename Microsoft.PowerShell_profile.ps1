@@ -109,7 +109,7 @@ function Install-Chocolatey {
 $Base = @("7zip", "boxstarter", "firefox", "git", "hashtab", "hxd", "notepadplusplus", "vlc", "windirstat", "microsoft-windows-terminal", "python")
 $Development += @($Base, "vscode", "azure-cli", "awscli", "terraform")
 $Forensics += @($Base, "sysinternals", "yara")
-$ReverseEngineering += @($Base, "ida-free", "ghidra")
+$ReverseEngineering += @($Base, "ida-free", "ghidra", "explorersuite")
 $Personal += @($Base, "mkvtoolnix")
 
 # Zimmerman Tools
