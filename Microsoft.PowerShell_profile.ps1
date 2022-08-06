@@ -120,4 +120,11 @@ function Install-ZimmermanTools {
     iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/EricZimmerman/Get-ZimmermanTools/master/Get-ZimmermanTools.ps1'))
 }
 
+###
+# System customisation + Boxstarter configs
+###
 
+# Don't show Edge tabs in Alt-Tab behaviour
+if ((Get-ItemProperty -Path "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name MultiTaskingAltTabFilter | Select-Object -ExpandProperty MultiTaskingAltTabFilter) -ne 3) {
+    Set-ItemProperty -Path "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name MultiTaskingAltTabFilter -Type DWord -Value 3
+}
