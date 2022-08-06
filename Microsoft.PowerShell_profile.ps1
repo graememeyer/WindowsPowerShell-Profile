@@ -106,7 +106,8 @@ function Install-Chocolatey {
 }
 
 # Chocolatey application lists
-$Base = @("7zip", "boxstarter", "firefox", "git", "hashtab", "hxd", "notepadplusplus", "vlc", "windirstat", "microsoft-windows-terminal", "python", "vscode", "obsidian")
+$Base = @("7zip", "boxstarter", "firefox", "git", "hashtab", "hxd", "notepadplusplus", "vlc", "windirstat", "python", "vscode", "obsidian")
+if ((Get-WmiObject -class Win32_OperatingSystem).Caption -match "Windows 10") {$Base += "microsoft-windows-terminal"}
 $Development += @($Base, "azure-cli", "awscli", "terraform")
 $Forensics += @($Base, "sysinternals", "yara", "wireshark")
 $ReverseEngineering += @($Base, "ida-free", "ghidra", "explorersuite")
@@ -118,4 +119,5 @@ function Install-ZimmermanTools {
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
     iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/EricZimmerman/Get-ZimmermanTools/master/Get-ZimmermanTools.ps1'))
 }
+
 
