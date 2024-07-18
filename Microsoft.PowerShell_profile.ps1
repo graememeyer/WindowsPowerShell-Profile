@@ -1,6 +1,7 @@
 ### 
 # Prompt Customisation
 ### 
+$FormatEnumerationLimit = 16 # Show more values in Format(-Table) output
 
 function Prompt {
     Write-Output "PS > "
@@ -15,7 +16,6 @@ function Get-BetterHistory {
         $NumberOfLines = 100
     )
     process {
-        
         Get-Content (Get-PSReadlineOption).HistorySavePath -Tail $NumberOfLines
     }
 }
@@ -37,8 +37,6 @@ if (test-path alias:curl) {
     Remove-Item alias:curl
 }
 
-
-#
 Set-Alias -Name windowsterminal -Value "wt -d $($pwd)"
 Set-Alias -Name Splunk -Value "C:\Program Files\Splunk\bin\splunk.exe"
 Set-Alias -Name ll -Value "Get-ChildItem"
@@ -66,7 +64,6 @@ Set-Alias -Name touch -Value "Touch-File"
 # Miscellaneous 
 ###
 
-
 function Update-Profile {
     try {
         Write-Host "Getting local profile..."
@@ -77,8 +74,7 @@ function Update-Profile {
         Write-Host "Updating local profile..."
         Set-Content -Path $PROFILE -Value $CloudProfile
         Write-Host "Reloading with new profile..."
-
-        
+      
         . $PROFILE
     }
     catch {
@@ -127,4 +123,41 @@ function Install-ZimmermanTools {
 # Don't show Edge tabs in Alt-Tab behaviour
 if ((Get-ItemProperty -Path "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name MultiTaskingAltTabFilter | Select-Object -ExpandProperty MultiTaskingAltTabFilter) -ne 3) {
     Set-ItemProperty -Path "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name MultiTaskingAltTabFilter -Type DWord -Value 3
+}
+
+
+###
+# Terraform
+###
+
+function Set-TerraformDebugging {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("TRACE", "DEBUG", "INFO", "WARN", "ERROR", "OFF")]
+        [string]$Level = "TRACE",
+
+        [Parameter(Mandatory=$false)]
+        [string]$LogPath,
+
+        [Parameter(Mandatory=$false)]
+        [switch]$Disable
+    )
+
+    if ($Disable) {
+        $env:TF_LOG = $null
+        $env:TF_LOG_PATH = $null
+        Write-Host "Terraform debugging has been disabled."
+    }
+    else {
+        $env:TF_LOG = $Level
+        Write-Host "Terraform log level set to: $Level"
+
+        if (-not $LogPath) {
+            $LogPath = "terraform_$($Level.ToLower()).txt"
+        }
+
+        $env:TF_LOG_PATH = $LogPath
+        Write-Host "Terraform log path set to: $LogPath"
+    }
 }
