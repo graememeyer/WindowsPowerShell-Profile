@@ -141,20 +141,33 @@ function Set-TerraformDebugging {
         [string]$LogPath,
 
         [Parameter(Mandatory=$false)]
-        [switch]$Disable
+        [switch]$Disable,
+
+        [Parameter(Mandatory=$false)]
+        [switch]$ProviderOnly
     )
 
     if ($Disable) {
         $env:TF_LOG = $null
+        $env:TF_LOG_PROVIDER = $null
         $env:TF_LOG_PATH = $null
         Write-Host "Terraform debugging has been disabled."
     }
     else {
-        $env:TF_LOG = $Level
-        Write-Host "Terraform log level set to: $Level"
+        if ($ProviderOnly) {
+            $env:TF_LOG = $null
+            $env:TF_LOG_PROVIDER = $Level
+            Write-Host "Terraform provider log level set to: $Level"
+        }
+        else {
+            $env:TF_LOG = $Level
+            $env:TF_LOG_PROVIDER = $null
+            Write-Host "Terraform log level set to: $Level"
+        }
 
         if (-not $LogPath) {
-            $LogPath = "terraform_$($Level.ToLower()).txt"
+            $logType = if ($ProviderOnly) { "provider" } else { "core" }
+            $LogPath = "terraform_${logType}_$($Level.ToLower()).txt"
         }
 
         $env:TF_LOG_PATH = $LogPath
