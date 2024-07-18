@@ -1,6 +1,7 @@
 ### 
 # Prompt Customisation
 ### 
+$FormatEnumerationLimit = 16 # Show more values in Format(-Table) output
 
 function Prompt {
     Write-Output "PS > "
