@@ -16,7 +16,6 @@ function Get-BetterHistory {
         $NumberOfLines = 100
     )
     process {
-        
         Get-Content (Get-PSReadlineOption).HistorySavePath -Tail $NumberOfLines
     }
 }
@@ -38,8 +37,6 @@ if (test-path alias:curl) {
     Remove-Item alias:curl
 }
 
-
-#
 Set-Alias -Name windowsterminal -Value "wt -d $($pwd)"
 Set-Alias -Name Splunk -Value "C:\Program Files\Splunk\bin\splunk.exe"
 Set-Alias -Name ll -Value "Get-ChildItem"
@@ -67,7 +64,6 @@ Set-Alias -Name touch -Value "Touch-File"
 # Miscellaneous 
 ###
 
-
 function Update-Profile {
     try {
         Write-Host "Getting local profile..."
@@ -78,8 +74,7 @@ function Update-Profile {
         Write-Host "Updating local profile..."
         Set-Content -Path $PROFILE -Value $CloudProfile
         Write-Host "Reloading with new profile..."
-
-        
+      
         . $PROFILE
     }
     catch {
