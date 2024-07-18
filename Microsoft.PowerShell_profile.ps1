@@ -124,3 +124,40 @@ function Install-ZimmermanTools {
 if ((Get-ItemProperty -Path "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name MultiTaskingAltTabFilter | Select-Object -ExpandProperty MultiTaskingAltTabFilter) -ne 3) {
     Set-ItemProperty -Path "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name MultiTaskingAltTabFilter -Type DWord -Value 3
 }
+
+
+###
+# Terraform
+###
+
+function Set-TerraformDebugging {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("TRACE", "DEBUG", "INFO", "WARN", "ERROR", "OFF")]
+        [string]$Level = "TRACE",
+
+        [Parameter(Mandatory=$false)]
+        [string]$LogPath,
+
+        [Parameter(Mandatory=$false)]
+        [switch]$Disable
+    )
+
+    if ($Disable) {
+        $env:TF_LOG = $null
+        $env:TF_LOG_PATH = $null
+        Write-Host "Terraform debugging has been disabled."
+    }
+    else {
+        $env:TF_LOG = $Level
+        Write-Host "Terraform log level set to: $Level"
+
+        if (-not $LogPath) {
+            $LogPath = "terraform_$($Level.ToLower()).txt"
+        }
+
+        $env:TF_LOG_PATH = $LogPath
+        Write-Host "Terraform log path set to: $LogPath"
+    }
+}
