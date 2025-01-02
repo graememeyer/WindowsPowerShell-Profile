@@ -60,6 +60,52 @@ Function Touch-File {
 
 Set-Alias -Name touch -Value "Touch-File"
 
+# Add-ToPath
+function Add-ToPath {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+        [string[]]$Path,
+
+        [ValidateSet('User', 'System')]
+        [string]$PathType = 'User',
+
+        [switch]$Force
+    )
+
+    begin {
+        $currentPath = $env:PATH -split ';'
+    }
+
+    process {
+        foreach ($PathItem in $Path) {
+            $fullPath = Resolve-Path $PathItem -ErrorAction Stop
+
+            if ($currentPath -notcontains $fullPath) {
+                $env:PATH += ";$fullPath"
+                Write-Host "Added to PATH (current session): $fullPath" -ForegroundColor Green
+
+                # Modify permanent PATH
+                $currentStoredPath = [Environment]::GetEnvironmentVariable('PATH', $PathType)
+
+                if (-not ($currentStoredPath -split ';' -contains $fullPath)) {
+                    if ($PathType -eq 'System' -and -not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+                        throw "Administrator privileges required to modify System PATH"
+                    }
+
+                    if ($Force -or $Host.UI.PromptForChoice("Confirm", "Add $fullPath to $PathType PATH?", @("&Yes", "&No"), 1) -eq 0) {
+                        [Environment]::SetEnvironmentVariable('PATH', "$currentStoredPath;$fullPath", $PathType)
+                        Write-Host "Added to $PathType PATH permanently: $fullPath" -ForegroundColor Cyan
+                    }
+                }
+            }
+            else {
+                Write-Host "Path already exists in PATH: $fullPath" -ForegroundColor Yellow
+            }
+        }
+    }
+}
+
 ###
 # Miscellaneous 
 ###
