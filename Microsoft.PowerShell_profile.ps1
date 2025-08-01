@@ -240,3 +240,25 @@ function Set-TerraformDebugging {
         Write-Host "Terraform log path set to: $LogPath"
     }
 }
+
+###
+# Terraform providers
+###
+$env:ARM_SUBSCRIPTION_ID = "abcdefgh-1234567890-abcdefgh" # prod
+$env:ARM_SUBSCRIPTION_ID = "abcdefgh-1234567890-abcdefgh" # dev
+
+function dev { az account set --name 'mydev' }
+function prod { az account set --name 'myprod' }
+
+
+function New-AzureSSHKeys {
+    param (
+        [string]$IPAddress = "*",
+        [string]$OutputFile = "azure-sshconfig",
+        [string]$KeysDestinationFolder = "azure-keys"
+    )
+    az ssh config --ip $IPAddress --file $OutputFile --keys-destination-folder $KeysDestinationFolder
+}
+function Create-AzureSSHKeys {
+    New-AzureSSHKeys
+}
