@@ -43,6 +43,9 @@ function Get-BetterHistory {
 
 
 ###
+
+$env:PYTHONDONTWRITEBYTECODE=1 # Don't write .pyc or __pycache__ files
+
 # General Aliases
 ###
 
