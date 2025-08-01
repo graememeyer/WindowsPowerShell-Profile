@@ -22,10 +22,15 @@ function Get-BetterHistory {
         [Parameter(Mandatory=$False)]
         [Alias("Lines")]
         [Int32]
-        $NumberOfLines = 100
+        $NumberOfLines = 10000,
+
+        [Parameter(Mandatory=$False)]
+        [String]
+        $Filter = "*"
     )
     process {
-        Get-Content (Get-PSReadlineOption).HistorySavePath -Tail $NumberOfLines
+        $historyPath = (Get-PSReadlineOption).HistorySavePath
+        Get-Content $historyPath -Tail $NumberOfLines | Where-Object { $_ -like $Filter }
     }
 }
 
