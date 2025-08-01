@@ -262,3 +262,80 @@ function New-AzureSSHKeys {
 function Create-AzureSSHKeys {
     New-AzureSSHKeys
 }
+
+###
+# Miscellaneous shortcut functions
+###
+function Get-CompiledProjectSummary {
+    [CmdletBinding()]
+    [Alias('Prepare-OutputForClaude')]
+    param (
+        [Parameter(Mandatory=$false)]
+        [ValidateSet('Terraform', 'FlaskBootstrap', 'Auto')]
+        [string]$ProjectType = 'Auto',
+
+        [Parameter(Mandatory=$false)]
+        [string]$OutputFile = "output.md"
+    )
+
+    $appName = (Get-Item -Path .).Name
+    Remove-Item $OutputFile -ErrorAction SilentlyContinue
+
+    function Detect-ProjectType {
+        if (Get-ChildItem -Path . -Recurse -Include *.tf -ErrorAction SilentlyContinue) {
+            return 'Terraform'
+        }
+        elseif (Get-ChildItem -Path . -Recurse -Include *.py -ErrorAction SilentlyContinue) {
+            return 'FlaskBootstrap'
+        }
+        else {
+            Write-Host "Unable to detect project type. Please specify manually."
+            return $null
+        }
+    }
+
+    if (-not $PSBoundParameters.ContainsKey('ProjectType') -or $ProjectType -eq 'Auto') {
+        $ProjectType = Detect-ProjectType
+        if ($null -eq $ProjectType) {
+            return
+        }
+        Write-Host "Detected project type: $ProjectType"
+    }
+
+    $fileTypes = @()
+    $excludePaths = @()
+
+    switch ($ProjectType) {
+        'Terraform' {
+            $fileTypes = @("*.tf", "*.conf")
+        }
+        'FlaskBootstrap' {
+            $fileTypes = @("*.py", "*.html")
+            $excludePaths = @("*\.venv\*", "*\migrations\*")
+        }
+    }
+
+    foreach ($fileType in $fileTypes) {
+        $files = Get-ChildItem -Path . -Recurse -Include $fileType
+        
+        if ($excludePaths.Count -gt 0) {
+            $files = $files | Where-Object {
+                $file = $_
+                -not ($excludePaths | Where-Object { $file.FullName -like $_ })
+            }
+        }
+
+        foreach ($file in $files) {
+            $relativePath = $file.FullName.Replace("$PWD\", "")
+            $extension = $file.Extension.TrimStart('.')
+            
+            "## File: $relativePath`n" | Out-File -Append -FilePath $OutputFile
+            "``````$extension" | Out-File -Append -FilePath $OutputFile
+            Get-Content $file.FullName | Out-File -Append -FilePath $OutputFile
+            "``````" | Out-File -Append -FilePath $OutputFile
+            "`n" | Out-File -Append -FilePath $OutputFile
+        }
+    }
+
+    Write-Host "Project summary compiled in $OutputFile"
+}
