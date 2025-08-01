@@ -233,7 +233,7 @@ function Set-TerraformDebugging {
 
         if (-not $LogPath) {
             $logType = if ($ProviderOnly) { "provider" } else { "core" }
-            $LogPath = "terraform_${logType}_$($Level.ToLower()).txt"
+            $LogPath = "terraform_${logType}_$($Level.ToLower()).log"
         }
 
         $env:TF_LOG_PATH = $LogPath
