@@ -7,6 +7,15 @@ function Prompt {
     Write-Output "PS > "
 }
 
+###
+# PowerShell History Customisation
+###
+
+# Use the same history file as ConsoleHost (e.g., Windows Terminal, regular terminal)
+if ($Host.Name -eq 'Visual Studio Code Host') {
+    Set-PSReadLineOption -HistorySavePath "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+}
+
 function Get-BetterHistory {
     [alias("h")]
     param (
