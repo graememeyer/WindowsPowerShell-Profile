@@ -1,6 +1,6 @@
-### 
+###
 # Prompt Customisation
-### 
+###
 $FormatEnumerationLimit = 16 # Show more values in Format(-Table) output
 
 function Prompt {
@@ -37,7 +37,7 @@ function Get-BetterHistory {
 # function global:prompt {
 #     $PwdPath = Split-Path -Path $pwd -Leaf
 #     Write-Host -Object "$PwdPath" -NoNewline -ForegroundColor Magenta
-#  
+#
 #     return "> "
 # }
 
@@ -58,6 +58,13 @@ if (test-path alias:curl) {
 Set-Alias -Name windowsterminal -Value "wt -d $($pwd)"
 Set-Alias -Name Splunk -Value "C:\Program Files\Splunk\bin\splunk.exe"
 Set-Alias -Name ll -Value "Get-ChildItem"
+
+Function Import-EnvironmentVariables {
+    [alias("refreshenv")]
+    [alias("RefreshEnv")]
+    param()
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "User") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
+}
 
 # Touch-File
 Function New-EmptyFile {
@@ -127,7 +134,7 @@ function Add-ToPath {
 }
 
 ###
-# Miscellaneous 
+# Miscellaneous
 ###
 
 function Update-Profile {
@@ -140,7 +147,7 @@ function Update-Profile {
         Write-Host "Updating local profile..."
         Set-Content -Path "$PROFILE" -Value $CloudProfile
         Write-Host "Reloading with new profile..."
-      
+
         . "$PROFILE"
     }
     catch {
@@ -317,7 +324,7 @@ function Get-CompiledProjectSummary {
 
     foreach ($fileType in $fileTypes) {
         $files = Get-ChildItem -Path . -Recurse -Include $fileType
-        
+
         if ($excludePaths.Count -gt 0) {
             $files = $files | Where-Object {
                 $file = $_
@@ -328,7 +335,7 @@ function Get-CompiledProjectSummary {
         foreach ($file in $files) {
             $relativePath = $file.FullName.Replace("$PWD\", "")
             $extension = $file.Extension.TrimStart('.')
-            
+
             "## File: $relativePath`n" | Out-File -Append -FilePath $OutputFile
             "``````$extension" | Out-File -Append -FilePath $OutputFile
             Get-Content $file.FullName | Out-File -Append -FilePath $OutputFile
