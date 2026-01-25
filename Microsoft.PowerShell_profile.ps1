@@ -34,17 +34,9 @@ function Get-BetterHistory {
     }
 }
 
-# function global:prompt {
-#     $PwdPath = Split-Path -Path $pwd -Leaf
-#     Write-Host -Object "$PwdPath" -NoNewline -ForegroundColor Magenta
-#
-#     return "> "
-# }
-
 ###
 # Environment Variables
 ###
-
 $env:PYTHONDONTWRITEBYTECODE=1 # Don't write .pyc or __pycache__ files
 
 # General Aliases
@@ -55,9 +47,28 @@ if (test-path alias:curl) {
     Remove-Item alias:curl
 }
 
-Set-Alias -Name windowsterminal -Value "wt -d $($pwd)"
 Set-Alias -Name Splunk -Value "C:\Program Files\Splunk\bin\splunk.exe"
 Set-Alias -Name ll -Value "Get-ChildItem"
+
+# Windows Terminal `wt.exe` command alias
+function wt {
+    if ($args.Count -gt 0) {
+        $first = $args[0]
+
+        $resolvedPath = Resolve-Path -LiteralPath $first -ErrorAction SilentlyContinue
+        if ($resolvedPath) {
+            if ($args.Count -gt 1) {
+                $rest = $args[1..($args.Count - 1)]
+                wt.exe -d $resolvedPath.Path @rest
+            }
+            else {
+                wt.exe -d $resolvedPath.Path
+            }
+            return
+        }
+    }
+    wt.exe @args
+}
 
 Function Import-EnvironmentVariables {
     [alias("refreshenv")]
@@ -70,6 +81,7 @@ Function Import-EnvironmentVariables {
 Function New-EmptyFile {
     [alias("Touch-File")]
     [alias("touch")]
+    param()
     $file = $args[0]
     if($file -eq $null) {
         throw "No filename supplied"
@@ -84,8 +96,6 @@ Function New-EmptyFile {
         echo $null > $file
     }
 }
-
-Set-Alias -Name touch -Value "Touch-File"
 
 # Add-ToPath
 function Add-ToPath {
@@ -160,23 +170,8 @@ function Update-Profile {
 ###
 # Chocolatey
 ###
-
-# Chocolatey profile
-$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-if (Test-Path($ChocolateyProfile)) {
-  Import-Module "$ChocolateyProfile"
-}
-
-# Install Chocolatey
-function Install-Chocolatey {
-    Set-ExecutionPolicy Bypass -Scope Process -Force; `
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
-    iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-}
-
 # Chocolatey application lists
-$Base = @("7zip", "boxstarter", "firefox", "git", "hashtab", "hxd", "notepadplusplus", "vlc", "windirstat", "python", "vscode", "obsidian")
-if ((Get-WmiObject -class Win32_OperatingSystem).Caption -match "Windows 10") {$Base += "microsoft-windows-terminal"}
+$Base = @("7zip", "boxstarter", "firefox", "git", "hashtab", "hxd", "notepadplusplus", "vlc", "windirstat", "python", "vscode", "obsidian", "microsoft-windows-terminal")
 $Development += @($Base, "azure-cli", "awscli", "terraform")
 $Forensics += @($Base, "sysinternals", "yara", "wireshark")
 $ReverseEngineering += @($Base, "ida-free", "ghidra", "explorersuite")
@@ -193,11 +188,12 @@ function Install-ZimmermanTools {
 # System customisation + Boxstarter configs
 ###
 
-# Don't show Edge tabs in Alt-Tab behaviour
-if ((Get-ItemProperty -Path "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name MultiTaskingAltTabFilter | Select-Object -ExpandProperty MultiTaskingAltTabFilter) -ne 3) {
-    Set-ItemProperty -Path "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name MultiTaskingAltTabFilter -Type DWord -Value 3
+function Set-SystemCustomisations {
+    # Don't show Edge tabs in Alt-Tab behaviour
+    if ((Get-ItemProperty -Path "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name MultiTaskingAltTabFilter | Select-Object -ExpandProperty MultiTaskingAltTabFilter) -ne 3) {
+        Set-ItemProperty -Path "HKCU:SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name MultiTaskingAltTabFilter -Type DWord -Value 3
+    }
 }
-
 
 ###
 # Terraform
@@ -248,16 +244,6 @@ function Set-TerraformDebugging {
     }
 }
 
-###
-# Terraform providers
-###
-$env:ARM_SUBSCRIPTION_ID = "abcdefgh-1234567890-abcdefgh" # prod
-$env:ARM_SUBSCRIPTION_ID = "abcdefgh-1234567890-abcdefgh" # dev
-
-function dev { az account set --name 'mydev' }
-function prod { az account set --name 'myprod' }
-
-
 function New-AzureSSHKeys {
     param (
         [string]$IPAddress = "*",
@@ -266,83 +252,7 @@ function New-AzureSSHKeys {
     )
     az ssh config --ip $IPAddress --file $OutputFile --keys-destination-folder $KeysDestinationFolder
 }
+
 function Create-AzureSSHKeys {
     New-AzureSSHKeys
-}
-
-###
-# Miscellaneous shortcut functions
-###
-function Get-CompiledProjectSummary {
-    [CmdletBinding()]
-    [Alias('Prepare-OutputForClaude')]
-    param (
-        [Parameter(Mandatory=$false)]
-        [ValidateSet('Terraform', 'FlaskBootstrap', 'Auto')]
-        [string]$ProjectType = 'Auto',
-
-        [Parameter(Mandatory=$false)]
-        [string]$OutputFile = "output.md"
-    )
-
-    $appName = (Get-Item -Path .).Name
-    Remove-Item $OutputFile -ErrorAction SilentlyContinue
-
-    function Detect-ProjectType {
-        if (Get-ChildItem -Path . -Recurse -Include *.tf -ErrorAction SilentlyContinue) {
-            return 'Terraform'
-        }
-        elseif (Get-ChildItem -Path . -Recurse -Include *.py -ErrorAction SilentlyContinue) {
-            return 'FlaskBootstrap'
-        }
-        else {
-            Write-Host "Unable to detect project type. Please specify manually."
-            return $null
-        }
-    }
-
-    if (-not $PSBoundParameters.ContainsKey('ProjectType') -or $ProjectType -eq 'Auto') {
-        $ProjectType = Detect-ProjectType
-        if ($null -eq $ProjectType) {
-            return
-        }
-        Write-Host "Detected project type: $ProjectType"
-    }
-
-    $fileTypes = @()
-    $excludePaths = @()
-
-    switch ($ProjectType) {
-        'Terraform' {
-            $fileTypes = @("*.tf", "*.conf")
-        }
-        'FlaskBootstrap' {
-            $fileTypes = @("*.py", "*.html")
-            $excludePaths = @("*\.venv\*", "*\migrations\*")
-        }
-    }
-
-    foreach ($fileType in $fileTypes) {
-        $files = Get-ChildItem -Path . -Recurse -Include $fileType
-
-        if ($excludePaths.Count -gt 0) {
-            $files = $files | Where-Object {
-                $file = $_
-                -not ($excludePaths | Where-Object { $file.FullName -like $_ })
-            }
-        }
-
-        foreach ($file in $files) {
-            $relativePath = $file.FullName.Replace("$PWD\", "")
-            $extension = $file.Extension.TrimStart('.')
-
-            "## File: $relativePath`n" | Out-File -Append -FilePath $OutputFile
-            "``````$extension" | Out-File -Append -FilePath $OutputFile
-            Get-Content $file.FullName | Out-File -Append -FilePath $OutputFile
-            "``````" | Out-File -Append -FilePath $OutputFile
-            "`n" | Out-File -Append -FilePath $OutputFile
-        }
-    }
-
-    Write-Host "Project summary compiled in $OutputFile"
 }
